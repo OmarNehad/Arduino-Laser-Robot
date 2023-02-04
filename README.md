@@ -169,3 +169,115 @@ for (int count = 0; count < b_cor; count++)
 
 ## App Logic part II: Shooting the target
 
+### Projection
+
+```csharp
+double[] projection = new double[IMG.Width];
+for (int i = 0; i < IMG.Width; i++)
+{
+    double Pxcolumn = 0;
+    for (int j = 0; j < IMG.Height; j++)
+    {
+				// diving by 255 yeilds the result in 0-1 range
+        projection[i] = Pxcolumn = Pxcolumn + ((R_Img_cor[j, i].Intensity) / 255); 
+    }
+
+}
+```
+
+### Calculating pixel to cm scale
+
+```csharp
+//This piece of code loops over the projection array and detects the average value needed to calcualate the pixel to cm scale.
+int k = 0;
+double sum = 0;
+
+while (k < projection.Length && projection[k] == 0) { k++; }
+k += 5;
+int start = k; // start of the current red dot
+for (int i = 0; i < 2; i++)
+{
+    while (k < projection.Length && projection[k] != 0) k++;
+    k += 5;
+
+    while (k < (IMG.Width - 5) && projection[k] == 0) k++;
+    k += 5;
+    int end = k; // end of the current red dot
+    sum = sum + (end - start); //
+    start = end; 
+}
+
+double Avg = sum / 2.0; //
+Px2CmScale = distanceBetweenPoints / Avg;
+```
+
+### Calculating target pixel coordinates
+
+```csharp
+int Xpx = 0;
+int Ypx = 0;
+int n = 0;
+
+// This loop looks for the black dot (target)
+for (int i = 0; i < IMG.Width; i++)
+    for (int j = 0; j < IMG.Height; j++)
+    {
+        if (B_Img_cor[j, i].Intensity > 128)
+        {
+            Xpx += i;
+            Ypx += j;
+            n++;
+
+        }
+    }
+
+if (n > 0)
+{
+
+    //
+    Xpx = Xpx / n;
+    Ypx = Ypx / n;
+
+    // calcuting the pixel coordiantes relative to the Origin point in the middle
+    double Py = Xpx - (IMG.Width / 2); 
+    double Pz = -(Ypx - (IMG.Height / 2));
+		double Ycm = Py * Px2CmScale;
+		double Zcm = Pz * Px2CmScale + laserToCamera;
+		.............
+```
+
+### Inverse kinematics equation
+
+```csharp
+// Calculting the angles using the derived kinematics equation
+double Th1 = Math.Atan(Ycm / cameraToTarget);
+double Th2 = Math.Atan(((Zcm) / Ycm) * Math.Sin(Math.Atan(Ycm / cameraToTarget)));
+
+//Converting the angle from radians to degrees.
+Th2 *= (180 / Math.PI);
+Th1 *= (180 / Math.PI);
+```
+
+### C# & Arduino communication
+
+```csharp
+// Target is below the middle
+if (Th2 < 0)
+{
+    Th1 = ((int)90 - Th1);
+    Th2 = ((int)100 - Th2);
+}
+else // Target is above the middle
+{
+    Th1 = ((int)40 - Th1);
+    Th2 = ((int)40 - Th2);
+}
+
+//Populating the array that will be sent to the arduino, varialbe order is crucial.
+Buff[0] = (byte)Th1;
+Buff[1] = (byte)Th2;
+
+//Sending thetas to arduino
+_serialPort.Write(Buff, 0, 2);
+```
+
