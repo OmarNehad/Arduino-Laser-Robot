@@ -108,7 +108,8 @@ This code is a bit slow but it yields a clean image. There is an alternate Smoot
 
 ```C#
 
-// Ultimately we are outputting corrosion varables so we need tocopy the segmentation result into them to be able to see them.
+// Ultimately we are outputting corrosion varables so we need to 
+// copy the segmentation result into them to be able to see them.
 R_Img_cor = R_Img_seg.Copy();
 
 //in case of a slow performance, check the SmoothMedian function
@@ -188,7 +189,8 @@ for (int i = 0; i < IMG.Width; i++)
 ### Calculating pixel to cm scale
 
 ```csharp
-//This piece of code loops over the projection array and detects the average value needed to calcualate the pixel to cm scale.
+// This piece of code loops over the projection array and 
+// detects the average value needed to calcualate the pixel to cm scale.
 int k = 0;
 double sum = 0;
 
