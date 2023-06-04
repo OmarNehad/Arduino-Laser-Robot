@@ -41,7 +41,7 @@ if (capture == null)
 {
     try
     {
-			// The paramter takes the index of the available cameras, 0 being the default one.
+	// The paramter takes the index of the available cameras, 0 being the default one.
         capture = new Capture(1); 
     }
     catch (NullReferenceException excpt)
@@ -58,7 +58,7 @@ B_frame = IMG[0].Copy();
 G_frame = IMG[1].Copy();
 R_frame = IMG[2].Copy();
 
-// Define variables that stores the segmentated & corrosioned red and black images for the red and black dots */
+// Define variables for segmentated & corrosioned red and black images/dots */
 R_Img_seg = IMG.Convert<Gray, Byte>();
 R_Img_cor = IMG.Convert<Gray, Byte>();
 B_Img_seg = IMG.Convert<Gray, Byte>();
